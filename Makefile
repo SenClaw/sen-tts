@@ -28,6 +28,18 @@ else
   PLATFORM := windows-x64
 endif
 
+# Windows executables carry `.exe`. The manifest's `bin/<id>` still finds
+# it: process creation on Windows appends `.exe` to an extensionless path.
+ifeq ($(PLATFORM),windows-x64)
+  EXE := .exe
+else
+  EXE :=
+endif
+
+# GNU `sha256sum` where it exists (Linux, Git Bash on Windows), else macOS's
+# `shasum`; both write the `shasum -c` format the protocol pins.
+SHA256 := $(shell command -v sha256sum >/dev/null 2>&1 && echo sha256sum || echo shasum -a 256)
+
 DIST := dist
 PKG_NAME := $(ID)-$(VERSION)-$(PLATFORM)
 PKG_DIR := $(DIST)/$(PKG_NAME)
@@ -45,11 +57,11 @@ test:
 package: build
 	rm -rf "$(PKG_DIR)"
 	mkdir -p "$(PKG_DIR)/bin"
-	cp "$(CARGO_TARGET_DIR)/release/$(ID)" "$(PKG_DIR)/bin/$(ID)"
-	sh scripts/bundle-shared-libs.sh "$(PKG_DIR)/bin/$(ID)"
+	cp "$(CARGO_TARGET_DIR)/release/$(ID)$(EXE)" "$(PKG_DIR)/bin/$(ID)$(EXE)"
+	sh scripts/bundle-shared-libs.sh "$(PKG_DIR)/bin/$(ID)$(EXE)"
 	cp senclaw-runtime.json "$(PKG_DIR)/senclaw-runtime.json"
 	cd "$(DIST)" && tar czf "$(PKG_NAME).tar.gz" -C "$(PKG_NAME)" .
-	cd "$(DIST)" && shasum -a 256 "$(PKG_NAME).tar.gz" > "$(PKG_NAME).tar.gz.sha256"
+	cd "$(DIST)" && $(SHA256) "$(PKG_NAME).tar.gz" > "$(PKG_NAME).tar.gz.sha256"
 	@echo "packaged $(DIST)/$(PKG_NAME).tar.gz"
 
 # `senclaw runtime install-local <archive>` when a `senclaw` binary is on
@@ -62,7 +74,7 @@ install-local: package
 		dst="$$HOME/.senclaw/runtimes/$(ID)/$(VERSION)"; \
 		echo "no senclaw binary on PATH; extracting into $$dst"; \
 		rm -rf "$$dst"; mkdir -p "$$dst/bin"; \
-		cp "$(PKG_DIR)/bin/$(ID)" "$$dst/bin/$(ID)"; \
+		cp "$(PKG_DIR)/bin/$(ID)$(EXE)" "$$dst/bin/$(ID)$(EXE)"; \
 		for f in "$(PKG_DIR)"/bin/*.dylib "$(PKG_DIR)"/bin/*.so; do \
 			[ -e "$$f" ] || continue; cp "$$f" "$$dst/bin/$$(basename "$$f")" 2>/dev/null || true; \
 		done; \
