@@ -1,0 +1,56 @@
+[workspace]
+members = ["."]
+resolver = "2"
+
+[package]
+name = "sen-tts"
+version = "0.1.0"
+edition = "2021"
+description = "SenClaw text-to-speech runtime: VieNeu-TTS v3 Turbo (ONNX Runtime) and macOS say presets"
+license = "MIT"
+repository = "https://github.com/SenClaw/sen-tts"
+
+[[bin]]
+name = "sen-tts"
+path = "src/main.rs"
+
+[dependencies]
+sen-runtime-sdk = { path = "../senclaw/crates/sen-runtime-sdk" }
+
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+anyhow = "1"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
+
+tokio = { version = "1", features = ["full"] }
+axum = { version = "0.7", features = ["json"] }
+once_cell = "1"
+futures = "0.3"
+tokio-util = { version = "0.7", features = ["rt"] }
+reqwest = { version = "0.12", default-features = false, features = ["json", "stream", "rustls-tls"] }
+zip = "2"
+dirs = "5"
+
+# VieNeu-TTS v3 Turbo engine.
+rand = "0.8"
+unicode-normalization = "0.1"
+regex = "1"
+# Pinned to the exact version sen-sysone (and the old daemon) validated Laya
+# against — a newer rc renamed the CPU execution-provider API. `download-binaries`
+# fetches a prebuilt onnxruntime at build time, no system install needed.
+ort = { version = "=2.0.0-rc.12", optional = true, features = ["download-binaries"] }
+# Vendored sea-g2p core (src/tts/vieneu/sea_g2p) needs look-around regexes and
+# mmaps its phoneme dictionary.
+fancy-regex = { version = "0.18", optional = true }
+memmap2 = { version = "0.9", optional = true }
+tokenizers = { version = "0.22", optional = true, default-features = false, features = ["fancy-regex"] }
+
+[dev-dependencies]
+tempfile = "3"
+tower = { version = "0.5", features = ["util"] }
+
+[features]
+default = ["tts-vieneu"]
+# Build: cargo build --features tts-vieneu
+tts-vieneu = ["dep:ort", "dep:fancy-regex", "dep:memmap2", "dep:tokenizers"]
