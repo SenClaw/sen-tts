@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "sen-tts",
   "name": "SenClaw Text to Speech",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "VieNeu-TTS v3 Turbo (ONNX Runtime) and macOS say presets",
   "type": "tts",
   "slots": ["tts"],
@@ -19,6 +19,6 @@
   "idleTimeoutSecs": 300,
   "api": { "openaiBase": "/v1" },
   "homepage": "https://github.com/SenClaw/sen-tts",
-  "releaseNotesUrl": "https://github.com/SenClaw/sen-tts/releases/tag/v0.1.0",
+  "releaseNotesUrl": "https://github.com/SenClaw/sen-tts/releases/tag/v0.1.1",
   "license": "MIT"
 }
