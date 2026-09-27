@@ -8,7 +8,7 @@
   "slots": ["tts"],
   "formats": [],
   "capabilities": ["tts"],
-  "platforms": ["darwin-arm64", "darwin-x64", "linux-x64", "linux-arm64", "windows-x64", "windows-arm64"],
+  "platforms": ["darwin-arm64", "linux-x64", "linux-arm64", "windows-x64", "windows-arm64"],
   "mode": "service",
   "entry": {
     "command": "bin/sen-tts",
